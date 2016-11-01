@@ -106,7 +106,7 @@ void handleCommand(char* cmdBuffer) { // handles commands
 	} else if (strcasecmp(argument, "arg2") == 0) {
 		Serial.println("..with argument two");
 	} else {
-		Serial.println('..with an unknown argument");
+		Serial.println("..with an unknown argument");
 	}		
   }
   
