@@ -48,10 +48,20 @@
 #define PIN_INPUT_IVEND A1
 
 // Which analog pin is the door switch connected to (active low)
-#define PIN_INPUT_DOOR A3
+#define PIN_INPUT_DOOR A2
 
 // Which analog pin is the hotel swipe card relay connected to (active low)?
 #define PIN_INPUT_HOTEL A0
+
+// What is the analog input threshold to consider the door open? Values below
+// this are considered open. Test in-circuit as the top board has bias.
+#define THRESHOLD_DOOR 200
+
+// Similar to above. What is the threshold for the Ivend sensor input?
+#define THRESHOLD_IVEND 100
+
+// And again, but for the hotel swipe card input.
+#define THRESHOLD_HOTEL 500
 
 // What should we show for the prompt on the serial interface?
 #define CMDPROMPT "Hotel card v2> "
@@ -144,22 +154,22 @@ void loop() {
   serialInterface();
         
   // If the door is open (and override disabled), turn everything on
-  if (doorState() < 500) {
+  if (doorState() < THRESHOLD_DOOR) {
     power_vpos(true);
     power_mdb(true);
     digitalWrite(PIN_LED_INT, HIGH);
   // If the door is closed, use the normal logic (timer/ivend)
   } else {
     // If the hotel swipe card is activated..
-    if (analogRead(PIN_INPUT_HOTEL) < 500) {
+    if (analogRead(PIN_INPUT_HOTEL) < THRESHOLD_HOTEL) {
       event_hotel();
-    // If the i-vend sensor is triggered..
-    } else if ((analogRead(PIN_INPUT_IVEND) < 500) && (doorState() > 500)) {
+    // If the i-vend sensor is triggered (and MDB is on)
+    } else if ((analogRead(PIN_INPUT_IVEND) < THRESHOLD_IVEND) && (doorState() > THRESHOLD_DOOR) && (state_mdb == true)) {
       event_ivend();
     }
   }
 
-  if (doorState() > 500) {
+  if (doorState() > THRESHOLD_DOOR) {
     /* Check the MDB and VPOS off timers (accounting for millis() rollover).
        If the respective timer has expired, turn off that relay.
     */
@@ -326,7 +336,7 @@ void handleCommand(char* cmdBuffer) { // handles commands
       Serial.print(F(") Door "));
       if (door_override == true) {
           Serial.println(F("closed (OVERRIDE)"));
-      } else if (doorState() < 500) {
+      } else if (doorState() < THRESHOLD_DOOR) {
           Serial.println(F("open"));
       } else {
           Serial.println(F("closed"));          
@@ -334,7 +344,7 @@ void handleCommand(char* cmdBuffer) { // handles commands
       Serial.print(F("\t("));
       Serial.print(analogRead(PIN_INPUT_HOTEL));
       Serial.print(F(") Hotel card input "));
-      if (analogRead(PIN_INPUT_HOTEL) < 500) {
+      if (analogRead(PIN_INPUT_HOTEL) < THRESHOLD_HOTEL) {
           Serial.println(F("active"));
       } else {
           Serial.println(F("inactive"));
@@ -342,7 +352,7 @@ void handleCommand(char* cmdBuffer) { // handles commands
       Serial.print(F("\t("));
       Serial.print(analogRead(PIN_INPUT_IVEND));
       Serial.print(F(") Vend sensor "));
-      if (analogRead(PIN_INPUT_IVEND) < 500) {
+      if (analogRead(PIN_INPUT_IVEND) < THRESHOLD_IVEND) {
           Serial.println(F("blocked"));
       } else {
           Serial.println(F("clear"));
@@ -353,7 +363,7 @@ void handleCommand(char* cmdBuffer) { // handles commands
           Serial.println(F("\tMDB power off"));
       } else {
           Serial.println(F("\tMDB power on"));
-          if (doorState() < 500) {
+          if (doorState() < THRESHOLD_DOOR) {
             Serial.println(F("\t\tTimer disabled - door open"));            
           } else {
             Serial.print(F("\t\tTurning off in "));
@@ -365,7 +375,7 @@ void handleCommand(char* cmdBuffer) { // handles commands
           Serial.println(F("\tVPOS power off"));
       } else {
           Serial.println(F("\tVPOS power on"));
-          if (doorState() < 500) {
+          if (doorState() < THRESHOLD_DOOR) {
             Serial.println(F("\t\tTimer disabled - door open"));            
           } else {
             Serial.print(F("\t\tTurning off in "));
