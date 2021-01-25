@@ -49,6 +49,6 @@ void getMessage(String search, char* target) {
     // close the file
     dataFile.close();
   }
-  // return the message
-  return message;
+  // set the target to the message
+  target = message;
 }
