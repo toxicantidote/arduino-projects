@@ -39,7 +39,7 @@ void getMessage(String search, char* target) {
 
       // if those two characters match our target string
       if (search == code) {
-        // get the remaing text on the line, up to 32 characters long
+        // get the remaning text on the line, up to 32 characters long
         str.substring(2).toCharArray(message, 32);
         // break out of the read loop - we have found what we need
         break;
