@@ -1,6 +1,11 @@
 # arduino-projects
 Assorted code segments for Arduino processor boards. This repository will be updated as I create more code segments.
 
+## aht20_softwire_example
+Compatibility: Tested on ESP32-C3, but should theoretically work on any Arduino board?
+
+Purpose: Example code for interfacing with two AHT20 temperature sensors using Softwire to do I2C on any pins.
+
 ## generic_cmdline
 Compatibility: All Arduino boards and clones with a serial interface available.
 
